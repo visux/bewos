@@ -1,0 +1,82 @@
+/* Questa la documentazione del bootloader
+ * Autori: Black e WMI
+ ********************************************************/
+
+
+Ci sono due bootloader, uno che funziona senza filesystem (raw), l' altro che funziona con un filesystem fat12. La differenza tra i due e' semplicemente il modo con cui viene caricato il kernel in memoria.
+L'obiettivo di entrambi i bootloader e' di caricare il kernel alla posizione 0x1000:0 e di lanciarlo ( RICORDA: 0x1000:0 o 0x10000 sono la stessa cosa, sono notazioni differenti una per real mode, e l'altra per protect mode)
+Entrambi i bootloader sono memorizzati nel bootsector dei floppy, cioe' il settore 0. Il BIOS al momento dell'avvio del computer legge questo settore e lo carica in memoria in 0x7C00. Dopodiche' lo esegue.
+
+BOOTLOADER RAW:
+Il bootloader raw funziona su dischi non formattati. Il kernel in questo caso e' collocato nei settori immediatamente successivi al bootsector (a partire da 1). IL numero di settori da caricare viene definito in fase di compilazione basandosi sulla grandezza del file kernel.bin generato. Una volta finito il caricamento in 0x1000:0 il kernel viene lanciato tramite un far jump.
+La struttura di un disco con bootloader raw e' questa:
+
+   --------------------------------------------------------------------------------------------------------------------------
+   || Settore 0 (bootsector)  || Restanti settori (spazio occupato dal kernel)
+   ||                         ||
+   || raw/bootsector.asm      || kernel.bin
+   ||                         ||
+   --------------------------------------------------------------------------------------------------------------------------
+
+BOOTLOADER FAT12:
+Il bootloader fat12 funziona invece su dischi formattati con filesystem fat12 appunto. Questo filesystem e' piu' complesso del primo, perche' legge il kernel usando le tabelle e gli elenchi del filesystem. Per comprendere meglio il funzionamento di tale bootloader si rimanda a qualche guida sul filesystem FAT12, comunque in generale possiamo riassumere il suo funzionamento in 332 fasi:
+   - Lettura della directory principale del floppy alla ricerca di "kernel.bin" (kernel.bin e' un file binario, e' il file che contiene il kernel appunto)
+     Da questa lettura si puo' ricavare il primo cluster (unita' di allocazione) occupato dal file
+   - Lettura (usando la File Allocation Table) dell'elenco di tutti i cluster occupati dal file.
+     L'elenco viene salvato in una lista gestita tramite le funzioni add_cluster e read_cluster.
+   - Lettura in sequenza e memorizzazione di tutti i cluster del file a partire dalla locazione di memoria 0x1000:0
+   - Far jump a 0x1000:0
+
+   ----------------------------------------------------------------------------------------------------------------------------------
+   || Settore 0 (bootsector)  || Settori 1-18 (FATs)    || Settori 19-32 (rootdir)|| Restanti settori (Open Space)
+   ||                         ||                        ||                        ||
+   || fat12/bootsector.asm    || Le due FAT, di 9 set-  || Informazioni sui files || In questa zona del disco e' memorizzato
+   ||                         || tori l'una             || della root directory   || il contenuto dei files, ma non in modo continuo
+   ----------------------------------------------------------------------------------------------------------------------------------
+
+
+Riassumiamo quindi gli aspetti comuni a entrambi i bootloader nella fase di boot:
+
+- Bootloader in 0x7C00
+- Lettura del kernel caricando man mano il tutto a partire da 0x1000:0
+- Far jump a 0x1000:0
+
+/* Stiamo ora eseguendo il file kernel.bin */
+
+Il file kernel.bin inizia con il second stage bootloader, poi seguito dal kernel.
+Layout della memoria:
+
+  -----------------------------------------------------------------------------------------------------------------------------------
+  || 0x10000 (o 0x1000:0)     || 0x10000+[DIMENSIONE_SECOND_STAGE]
+  || Second stage bootloader  || Kernel
+  -----------------------------------------------------------------------------------------------------------------------------------
+
+Il second stage bootloader e' una parte di codice indipentente dal bootloader first stage, che serve a passare dalla modalita' reale a quella protetta.
+- Abilitazione linea di indirizzamento a20 (che consente di superare il limite di 1MB)
+- Caricamento di una GDT (Global Descriptor Table) provvisoria
+- Abilitazione della protect mode (tramite il bit PE del registro cr0)
+
+- Una volta abilitata la protect mode, il second satge lancia il kernel, che inizia immediatamente dopo il second stage
+
+
+
+Ricapitolando gli indirizzi: 
+
+- 0x7C00 e' da dove parte il bootloader
+- il bootloader(bootsector.asm) carica in memoria all' indirizzo 0x1000:0 il second stage e il kernel (kernel.bin contiene il second stage e il kernel)
+- il second stage lancia il kernel
+
+
+Istruzioni del second stage che laciano il kernel:
+
+<CODE>
+mov eax, 0x10000+(kernel-$$)	; Imposta la locazione di memoria del kernel
+jmp eax				; Eseguo il kernel
+</CODE>
+
+kernel e' un etichetta ed e' definito proprio alla fine del second stage; indica praticamente il byte successvi al second stage infatti alla fine del file "second_stage_bl.asm" vi sono le seguenti righe di codice:
+
+<CODE>
+; Immediatamente dopo il second stage viene aggiunto il kernel. Con la seguente etichetta indico l'inizio del kernel
+kernel:
+</CODE>

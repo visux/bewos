@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Operazioni necessarie alla creazione di dischi FAT12
+
+mountcount=$(grep -c /dev/fd0 /etc/mtab)
+if [ "$mountcount" = "0" ]; then echo "ERRORE: /dev/fd0 non montato"; exit; fi;
+if [ "$mountcount" != "1" ]; then echo "ERRORE: /dev/fd0 montato piu' di una volta"; exit; fi;
+
+# Legge da mtab informazioni sul mountpoint di /dev/fd0 e sul suo filesystem
+line=$(grep /dev/fd0 /etc/mtab | tail --bytes=+10)
+sep_pos=$(expr index "$line" " ")
+mpath=${line:0:$sep_pos-1}
+mountpoint=${mpath//\\040/ }
+linex=${line:$sep_pos}
+sep_pos=$(expr index "$linex" " ")
+filesystem=${linex:0:$sep_pos}
+
+if [ $(echo "$line" | grep -c fat) != "1" ]; then echo "ERRORE: /dev/fd0 non contiene un filestem FAT12"; exit; fi;
+
+errorescrittura=1
+
+# Copia il file kernel.bin sul floppy, se l'operazione di copia ha successo, aggiorna nache il bootsector
+cp kernel.bin "$mountpoint/kernel.bin" && dd if=boot/bootloaders/fat12/bootsector.bin of=/dev/fd0 && errorescrittura=0
+
+if [ "$errorescrittura" = "1" ]; then echo " "; echo "ERRORE DI SCRITTURA. BeWos non e' stato installato"; exit; fi;
+
+echo " "
+echo "In alcuni casi puo' essere conveniente smontare il volume prima di usare il"
+echo "floppy all'interno di un simulatore (come Bochs o Qemu)"

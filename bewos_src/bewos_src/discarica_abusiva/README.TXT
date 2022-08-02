@@ -1,0 +1,3 @@
+In questa directory ("discarica_abusiva") va messo tutto il codice scritto e che si pensa che NON verra' mai utilizzato!....
+
+Tale dir puo' essere utile nel caso in cui in futuro si voglia utilizzare del codice scritto(ma non utilizzato) o semplicemente riprendere parti da esso.

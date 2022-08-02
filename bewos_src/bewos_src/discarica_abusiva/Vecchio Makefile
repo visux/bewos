@@ -1,0 +1,91 @@
+# Black & White Operating System
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; either version 2 of the License, or (at your
+# option) any later version.
+#  
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details (in the COPYING file).
+# 
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+
+#*****************************************INFO******************************************************
+# Coders: Black, BlackPanter(soprattutto per l'idea)
+# Descrizione: Installatore di BeWos
+#******************************************************************************************************
+
+CFLAGS = -fomit-frame-pointer -O -nostdlib -fno-builtin -march=i386 -nostdinc -I./include
+[ -z $CC ] && CC = @ cc
+
+OBJ = main.o driver/console.o libc/vsprintf.o kernel/printk.o kernel/scank.o interrupt/idt.o kernel/io_port.o interrupt/pic8259.o interrupt/pit8253.o interrupt/timer.o interrupt/irq.o driver/keyboard.o  libc/string.o apps/shell.o libc/math.o driver/floppy.o libc/time.o mm/gdt.o mm/phisicmem.o  mm/phisicalloc.o mm/kmalloc.o mm/malloc.o task/scheduler.o task/task.o task/semaphores.o task/signals.o mm/paging.o  kernel/syscall.o kernel/delay.o kernel/system.o kernel/wait.o apps/vfloppy.o 
+
+SOURCEFILES = main.c driver/console.c libc/vsprintf.c kernel/printk.c kernel/scank.c interrupt/idt.c kernel/io_port.c interrupt/pic8259.c interrupt/pit8253.c interrupt/timer.c interrupt/irq.c driver/keyboard.c  libc/string.c apps/shell.c libc/math.c driver/floppy.c libc/time.c mm/gdt.c mm/phisicmem.c  mm/phisicalloc.c mm/kmalloc.c mm/malloc.c task/scheduler.c task/task.c task/semaphores.c task/signals.c mm/paging.c  kernel/syscall.c kernel/delay.c kernel/system.c kernel/wait.c apps/vfloppy.c
+	
+all: clean $(SOURCEFILES) boot/bewoot.asm
+	@ echo " "
+	@ echo " "
+	make clean
+
+	@ echo " "
+	@ echo " "
+	@ echo "Compilazione di Black & White Operating System: "
+	@ echo " "
+	@ echo " "
+	
+	@ echo COMPILAZIONE DEL KERNEL IN CORSO ...
+	@ make $(OBJ)
+	@ echo [ DONE ]
+	@ echo " "
+	
+	@ echo LINKING DEGLI OBJECT FILES IN CORSO ...
+	@ ld  -Bstatic --oformat binary -o kernel.bin $(OBJ) -Ttext 0x10000 -Map kernel.map
+	@ echo [ DONE ]
+	@ echo " "
+	make Bewoot
+	
+Bewoot:	
+	@ echo COMPILAZIONE DEL BOOTLOADER IN CORSO ...
+	nasm -fbin boot/bewoot.asm -o boot/bewoot.bin -dDIM_KERNEL=$(shell \
+		let DIM_KERNEL=$(shell \
+		let DIM_KERNEL=$(shell \
+                let DIM_KERNEL=$(shell du -cb kernel.bin \
+                | tail -1 | awk '{print $1}'); echo $$DIM_KERNEL)/512; echo $$DIM_KERNEL)+6; echo $$DIM_KERNEL)
+	@ echo [ DONE ]
+	@ echo " "
+	
+	@ echo COMPILAZIONE DELLA FIRMA DEL KERNEL IN CORSO ...
+	nasm -fbin boot/signature.asm -o boot/signature.bin
+	@ echo [ DONE ]
+	@ echo " "
+	make BeWos.img
+
+BeWos.img:
+	 @ echo CREAZIONE IMMAGINE IN CORSO ...
+	 dd if=/dev/zero of=pad.img bs=$(shell \
+	 	let bs=1474560-$(shell du -cb \
+		boot/bewoot.bin kernel.bin boot/signature.bin \
+		| tail -1 | awk '{print $1}'); echo $$bs) \
+		count=1
+	 cat  boot/bewoot.bin kernel.bin boot/signature.bin pad.img > BeWos.img
+	 @ echo [ DONE ]
+	 @ echo " "
+
+.PHONY: clean install 
+
+clean:
+	@ echo "CANCELLAZIONE FILE IMMAGINI E OGGETTI... "
+	@ rm -f *.img *.bin *.map boot/*.bin
+	@ rm -f $(OBJ)
+	@ echo [ DONE ]
+
+install: BeWos.img
+	@ echo INSTALLAZIONE IMMAGINE SU FLOPPY IN CORSO ...
+	dd if=BeWos.img of=/dev/fd0
+	@ echo [ DONE ]
+	@ echo " "

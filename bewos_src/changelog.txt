@@ -1,0 +1,70 @@
+Anno 2004:
+Aprile 17/18: Nascita del progetto B&Wos
+Mese di agosto: pubblicazione della prima versione di B&Wos con le seguenti caratteristiche:
+
+- Bootloader
+- Implementata la funzione per la stampa a video(senza le specifiche di conversione)
+- Gestione base degli interrupt
+- Tastiera abilitata
+- Implementazione di una shell
+
+Nel corso del 2004/2005 sono state apportate le seguenti modifiche e aggiunte:
+
+- Gestione della memoria fisica
+- Gestione avanzata degli interrupt
+- Implementazione del PIT (Programmable Interrupt Timer)
+- Gestione base del multitasking
+- Gestione della mutua esclusione attraverso i "semafori"
+- Creazione di alcuni "segnali" per la comunicazione interprocesso(sleep_task e wakeup_task)
+- Gestione della paginazione hardware(TODO: Demand Paging)
+- Creazione di funzioni kmalloc, malloc e free
+- scrittura della libreria C "string.h"
+- Inizializzazione e gestione della GDT (Global Descriptor Table)
+- Gestione della Protezione(task in ring 0 e ring3)
+- Implementazione delle system calls
+- Creazione delle prime system calls(getpid, sleep ...)
+- Riconoscimento del lettore floppy
+- Implementato un floppy virtuale
+- Gestione della Data e Ora (compresa la lettura e la scrittura della data di sistema)
+- Riscrittura della printk(ora resa piu' efficiente)
+- Miglioramento della gestione della keyboard
+- Implementazione di Consoles virtuali. Switch tra le consoles attraverso alt-n
+- Inserimento di una barra in alto per le informazioni riguardanti la console corrente e l' ora
+- Introduzione di un framework generalizzato per i timer
+- Introduzione di funzioni per il trattamento di variabili atomiche
+- Implementazione di un framework per wait list
+
+
+
+					Anno 2006
+
+7 gennaio 2006: Timer framework V2 e numerosi bugfix che causavano il crash di B&Wos
+11 gennaio 2006: Nuova implementazione dei semafori 
+1 febbraio 2006: Implementazione dei quantum(ad ogni task viene assegnato una determinata porzione di tempo di CPU)
+18 febbraio 2006:
+	- Corretta la conversione di interi in stringhe (libc/string.c)
+	- Aggiunto un Makefile che consente di compilare tramite un ambiente apposito (da compilare usando cygwin) anche da windows. 12 luglio 2006: Makefile_win rimosso. E' possibile compialre bewos tramite cygwin con il Makefile principale
+	  Il link alla guida per ottenere l'ambiente di sviluppo e' scritto nel Makefile_win
+11 marzo 2006: Aggiunto un check per verificare che il kernel sia stato eseguito correttamente (si veda il file /boot/signature.asm per maggiori info)
+1 maggio 2006: 
+	- Risolto il bug riguardante il riconoscimento della firma in qemu
+	- Creato il file di intestazione elf.h, contenente le definizioni delle strutture e dei valori standard di ELF.
+25 giugno 2006:
+	- Aggiunta opzione (-d) per la compilazione di bewoot.asm, la quale assieme ai comandi let e awk permette di calcolare automaticamente il numero di settori che occupa il kernel.
+12 luglio 2006:
+	- Nuovo Makefile che permette anche di selezionare la modalita' DEBUG, che definisce la macro DEBUG durante la compilazione e disassembla il kernel in kernel.S, in modo da consentire la lettura dell'output del compilatore
+	- Corretto bug che si verificava con Bochs 2.2.6 (in interrupt/irq.c)
+13 luglio 2006:
+	- Miglioramento della shell (tasti direzionali e cronologia)
+	- Miglioramento di console.c e printk.c per evitare lo sfarfallio della parte superiore dello schermo durante scroll
+	- La funzione printok ora ripristina il colore precedente alla sua chiamata anziche' quello di default
+	- Aggiunta funzione "char get_text_color(void)" (kernel/printk.c - io.h)
+14 luglio 2006:
+	- Creazione di un second stage del bootloader (vedi cartella boot/)
+	- Modificato il comportamento di clear_line (kernel/printk.c). Ora non modifica piu' la posizione del cursore dopo aver cancellato la riga indicata
+20 luglio 2006:
+	- Implementazione di un bootloader per filesystem FAT12 (si veda make.rules per decidere se usare un bootloader raw o fat12)
+	- Second stage spostato a 0x10000 (indicato anche come 0x1000:0 in rmode). Il kernel viene caricato immediatamente dopo la fine del second stage
+22 luglio 2006:
+	- Modificate regole di compilazione per standardizzare la creazione di immagini e l'installazione di floppy avviabili. Per consultare una breve guida alla compilazione eseguire "make help"
+21 ottobre 2006: risolto il bug 1577257 (http://sourceforge.net/support/tracker.php?aid=1577257)

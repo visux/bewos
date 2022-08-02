@@ -1,0 +1,72 @@
+# Black & White Operating System
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; either version 2 of the License, or (at your
+# option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details (in the COPYING file).
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+
+#*****************************************INFO******************************************************
+# Coders: WMI
+# Descrizione: Configurazione globale per la compilazione di BeWos
+#***************************************************************************************************
+
+## Selezione compilatore e altri programmi necessari alla compilazione
+
+# Su linux, nella maggior parte dei casi, i due valori di seguito possono essere impostati a 'gcc -c' e
+# 'ld', su windows si deve impostare a seconda dei casi. Attualmente sono impostati valori validi
+# per linux e per l'ambiente di compilazione windows fornito su www.bewos.org
+CC = gcc -c
+LD = ld
+
+# Altri tools necessari alla compilazione
+RM = rm -f
+NASM = nasm
+
+## Impostazioni di compilazione
+
+# Commentare/Decommentare questa variabile per settare la macro DEBUG e eseguire objdump sul kernel.
+# Inoltre tutti i warning vengono attivati
+DEBUG = yes
+
+# Parametri per il compilatore
+CFLAGS = -fomit-frame-pointer -O -nostdlib -fno-builtin -march=i386 -nostdinc $(shell if test "$(DEBUG)" = "yes" ; then echo "-Wall"; fi)
+LDFLAGS = -Bstatic -nostdlib -nostartfiles -nodefaultlibs
+
+## Impostazioni del bootloader
+
+# Selezionare un filesystem da utilizzare per il boot di bewos
+# Attualmete le scelte disponibili sono due:
+# - raw
+#    Crea un'immagine di un floppy (o altro supporto) avviabile priva di filesystem. In questo caso
+#    la lettura del kernel avviene sapendo gia' in fase di compilazione i settori sui quali esso
+#    e' collocato
+# - fat12
+#    Compila il bootloader per fat12 (floppy dos) e (opzionalmente) crea un disco avviabile (make install)
+
+FILESYSTEM = raw
+#FILESYSTEM = fat12
+
+# Impostazioni per la generazione di immagini del floppy (make floppy_img)
+
+# Dimensione dell'immagine da generare. Se commentato non verra' eseguito alcun padding.
+# Per eseguire bochs in qemu e' necessario creare un'immagine grande esattamente quanto un floppy (1474560)
+# L'immagine generata con il padding verra' salvata in un secondo file (BeWos_padded.img) e l'immagine senza padding verra' mantenuta in BeWos.img
+IMG_SIZE = 1474560
+
+# Impostazioni per raw:
+
+## Nessuna
+
+# Impostazioni per fat12:
+
+## TODO

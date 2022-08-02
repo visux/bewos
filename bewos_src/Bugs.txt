@@ -1,0 +1,11 @@
+Per riportare un bug di bewos basta utilizzare gli appositi tools messi a disposizione da SourceFourge. In particolare andare al sito: http://sourceforge.net/projects/bewos/ alla sezione "Tracker". Vi Verranno elencati una serie di trackers tra cui "Bugs", nella quale potete riportare il bug o i bugs riscontrati durante l'utilizzo e il debugging di bewos. Dunque una volta entrati nella sezione "Tracker", cliccare su "Submit New" per poter effettivamente, dopo aver compilato una specie di modulo, riportare il bug. In "Tracker inoltre potete esplorare("Browse") gli altri bugs riportati. Quindi si consiglia di vedere a priori quali bugs sono stati riscontrati da altri utenti prima di riportare il proprio.
+
+
+Buon Debugging ;)
+
+
+
+Per qualsiasi tipo di suggerimento o aiuto
+ 
+email: black.white_os@infinito.it
+irc: irc.azzurra.org \ #bewos

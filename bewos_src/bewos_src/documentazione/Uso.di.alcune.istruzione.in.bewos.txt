@@ -1,0 +1,27 @@
+########################### Uso di alcune istruzioni in BeWos ######################################
+
+In Questo File saranno inseriti i commenti riguardanti l' uso di alcune "particolari" istruzioni 
+usate in BeWos.
+(Quando l' uso non ne' particolare ne' importante e' preferibile che i commenti siano inseriti nei 
+files sorgenti stessi. In taluni casi e' maggiormente preferibile inserirli sia in questo file che 
+nei files sorgenti).
+####################################################################################################
+----------------------------------------------------------------------------------------------------
+
+
+Istruzione:  asm("": : :"memory");
+Commento: L' istruzione viene usata per evitare ottimizzazioni da parte di GCC. In pratica il GCC potrebbe usare i registri come cache, ma quell'istruzione dice che non deve usare "caches" o ottimizzazioni varie perche' deve leggere il risultato vero e proprio che c'e' in memoria e non quello di un'eventuale "cacheizzazione".
+
+
+-----------------------
+
+Istruzione:
+Commento:
+
+-----------------------
+
+Istruzione:
+Commento:
+
+-----------------------
+

@@ -1,0 +1,8 @@
+TODO:
+
+- Gestione della protezione		Stato: Finito
+- Gestione delle SystemCalls		Stato: Finito
+- DMA					Stato: In corso di sviluppo...
+- FileSystem FAT12			Stato: In corso di sviluppo...
+- Modalita' virtuale 8086		Stato: Da iniziare
+

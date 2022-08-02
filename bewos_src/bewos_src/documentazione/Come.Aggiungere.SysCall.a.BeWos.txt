@@ -1,0 +1,73 @@
+###################################################################################################
+#*********************************************Come aggiungere SystemCalls in B&Wos*********************************************#
+###################################################################################################
+#Autore: Black
+#Bibite consumate: nessuna
+#Cibi consumati: una busta di patatine
+#Data: 27 luglio 2005
+#Ora: 0:30
+#Versione file: 0.02
+........................................................................................................................................................................................................................................
+
+
+
+Aggiungere SysCalls in B&Wos e' piuttosto semplice. Di come funzioni la "gestione delle syscalls" e' spiegato nei file relativi alle System Calls(syscall.h e syscall.c).
+Di seguito mi limitero' a dire come deve essere aggiunta una nuova syscall in bewos in modo da poterla richiamare dai tasks
+
+Gli unici file che devono essere modificati sono: "syscall.h" e "syscall.c".
+
+Come esempio ipotizziamo di voler creare una syscall che chiameremo "prova" che stampi a video "ciao sono una system call di prova".
+
+Innanzitutto bisogna dare alla syscall un "identificativo". Dunque apriamo il file syscall.h e definiamo una costate in questa maniera:
+#define __NR_prova	2
+
+Da notare che il formato e' il seguente: __NR_nomesyscall. Se la syscall si sarebbe chiamata "pippo" allora dovevamo definire la costante come: #define __NR_pippo
+
+Nello stesso file bisogna dichiarare il prototipo della wrapper routine in questa maniera:
+static __inline__ _syscall0(int,  prova);
+
+faccio notare che alla macro _syscall0 sono stati passati due parametri ovvero il tipo di dato restituito dalla syscall e il nome della syscall. Non sono stati passati parametri aggiuntivi perche' la syscall che intendiamo creare non riceve nessun parametro in ingresso ed e' per questo che chiamiamo _syscall0(notare il numero 0. Questo indica il numero di parametri che la funzione riceve in ingresso). 
+
+se per esempio avessimo voluto creare una syscall di nome "pippo" che ricevesse in ingresso 2 parametri interi allora dichiaravamo la wrapper routine in questa maniera: static __inline__ _syscall2(int,  pippo, int, parametro1, int, parametro2);
+
+notare il numero "2" della macro _syscall2: questo significa che la syscall riceve in ingresso due parametri e nel nostro caso di tipo intero. Avete a disposizione 6 macro per syscall che ricevono in ingresso un numero di parametri che va da 0 a 5: _syscall0, _syscall1, _syscall2, _syscall3, _syscall4, _syscall5.
+Ricordare inoltre che il tipo restituito da una syscall e' sempre int.
+
+
+In questo stesso file(syscall.h) bisogna dichiarare la funzione di servizio(la system call vera e propria) in questa maniera:
+int sys_prova(void);
+
+da notare che il nome di questa funzione puo essere chiamata come si vuole, ma si preferisce anteporre il suffisso sys_ al nome della syscall.
+
+
+
+Ora apriamo il file syscall.c e nella funzione "init_sys_call" scriviamo: setup_syscall_table(sys_prova, __NR_prova);
+setup_syscall_table e' un' altra funzione che inizializza opportunamente l' array "system_call_table"
+
+
+Infine sempre nello stesso file definiamo, sotto alle definizioni delle altre syscall, la nostra syscall di prova in questa maniera
+
+int sys_prova(void)
+{
+	printk("ciao sono una system call di prova");
+}
+
+
+Abbiamo cosi' creato la nostra syscall!
+
+per richiamare la syscall da un task basta fare: prova();
+
+In questo modo si chiama la wrapper routine "prova" che a sua volta esegue l' interrupt 0x80 il quale e' associato all' handler che richiama la sys_prova la quale stampa la stringa a video :)
+
+
+Ovviamente le operazioni descritte per creare una syscall non devono essere obbligatoriamente eseguite in ordine, ma questo e' un buon metodo per non perdersi tra una syscall e un' altra.
+
+Per maggiori info di come funzionano le syscall e di come vengono implementate in bewos consultare i commenti presenti nei file syscall.c e syscall.h.
+
+
+
+Questo e' tutto...
+
+Black 
+
+B&Wos Project - www.bewos.org
